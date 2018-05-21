@@ -29,8 +29,6 @@ public class Server {
         try {
             while(serverOn) {
                 ClientHandler clientHandler = new ClientHandler(serverSocket, ++clientsServed, this);
-                //Thread clientThread = new Thread(clientHandler);
-                //clientThread.start();
                 clientHandler.start();
                 connectedClients.add(clientHandler);
                 System.out.println("Client id-ga: " + clientsServed + " liitus serveriga!");

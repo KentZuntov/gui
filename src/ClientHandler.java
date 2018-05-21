@@ -3,8 +3,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ClientHandler extends Thread {
     private Socket clientSocket;
@@ -13,6 +11,7 @@ public class ClientHandler extends Thread {
     private DataInputStream dataInputStream;
     private Server server;
     private String username;
+    private boolean online;
 
 
     public ClientHandler(ServerSocket serverSocket, int clientId, Server server) throws IOException {
@@ -20,6 +19,7 @@ public class ClientHandler extends Thread {
         this.clientId = clientId;
         this.server = server;
         this.username = null;
+        this.online = true;
     }
 
 
@@ -30,7 +30,7 @@ public class ClientHandler extends Thread {
             this.dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
 
 
-            while (true) {
+            while (online) {
                 String[] cmdMsg = dataInputStream.readUTF().split(" ", 2);
 
                 switch (cmdMsg[0]){
@@ -41,9 +41,11 @@ public class ClientHandler extends Thread {
                         for (ClientHandler connectedClients : server.getConnectedClients()) {
                             stringBuilder.append(connectedClients.getUsername()).append(" ");
                         }
-                        for (ClientHandler connectedClient : server.getConnectedClients()) {
-                            if (!connectedClient.equals(this)){
-                                connectedClient.dataOutputStream.writeUTF("ListOfPeople " + stringBuilder.toString());
+                        if (server.getConnectedClients() != null && server.getConnectedClients().size() > 1) {
+                            for (ClientHandler connectedClient : server.getConnectedClients()) {
+                                if (!connectedClient.equals(this)) {
+                                    connectedClient.dataOutputStream.writeUTF("ListOfPeople " + stringBuilder.toString());
+                                }
                             }
                         }
                         break;
@@ -65,15 +67,15 @@ public class ClientHandler extends Thread {
                         break;
 
                     case "people":
-                        StringBuilder sb = new StringBuilder();
-                        for (ClientHandler connectedClient : server.getConnectedClients()) {
-                            sb.append(connectedClient.getUsername()).append(" ");
-                        }
-                        dataOutputStream.writeUTF("ListOfPeople " + sb.toString());
+                            StringBuilder sb = new StringBuilder();
+                            for (ClientHandler connectedClient : server.getConnectedClients()) {
+                                sb.append(connectedClient.getUsername()).append(" ");
+                            }
+                            dataOutputStream.writeUTF("ListOfPeople " + sb.toString());
+
                         break;
                     case "logoff":
                         server.removeFromConnectedClients(this);
-                        //TODO streamid?
                         StringBuilder sb1 = new StringBuilder();
                         for (ClientHandler connectedClient : server.getConnectedClients()) {
                             sb1.append(connectedClient.getUsername()).append(" ");
@@ -81,6 +83,10 @@ public class ClientHandler extends Thread {
                         for (ClientHandler connectedClient : server.getConnectedClients()) {
                             connectedClient.dataOutputStream.writeUTF("ListOfPeople " + sb1.toString());
                         }
+                        dataOutputStream.close();
+                        dataInputStream.close();
+                        online = false;
+                        break;
                     default:
                         dataOutputStream.writeUTF("tundmatu käsk!");
                         break;

@@ -13,29 +13,42 @@ public class ClientTextOutput implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Sisesta kasutajanimi: ");
+        /*System.out.println("Sisesta kasutajanimi: ");
         try {
             dataOutputStream.writeUTF("login " + scanner.nextLine());
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
-        try {
+        /*try {
             dataOutputStream.writeUTF("people ");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
 
-        while (true) {
-            String tokens = scanner.nextLine();
+        /*while (true) {
+            String tokens = null;
             try {
-                dataOutputStream.writeUTF(tokens);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                tokens = scanner.nextLine();
+            } catch (NullPointerException n){
+                try {
+                    dataOutputStream.writeUTF("input null");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+            if (tokens != null) {
+                try {
+                    dataOutputStream.writeUTF(tokens);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }*/
+
     }
+
 
 
 }
